@@ -6,6 +6,16 @@ from google import genai
 from google.genai import types
 import time
 
+from ddgs import DDGS
+
+def web_search(quary : str) -> []:
+    print("search: "+ quary)
+
+    with DDGS as d:
+        results = d.text(quary, max_results=3)
+        return results
+
+
 def current_time() -> str:
     """
     פונקצי שמחזירה מה התאריך והשעה
@@ -37,7 +47,9 @@ def sendMessage(text,system_prompt,history=[]):
                 model = model,
                 history = history,#ההיסטוריה ששלחנו
                 config = types.GenerateContentConfig (
-                    system_instruction = system_prompt
+                    system_instruction = system_prompt,
+                    tools= [current_time],
+                    automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=False)
                 )
             )
 
