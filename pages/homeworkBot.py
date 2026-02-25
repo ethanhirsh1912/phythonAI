@@ -1,7 +1,11 @@
 from platform import system
 
 import streamlit as st
-from helper import * #תביא את כל הפונקציות מהקובץ המשותף
+from streamlit import file_uploader
+
+from helper import *#תביא את כל הפונקציות מהקובץ המשותף
+
+import PIL.Image
 
 st.set_page_config(
     page_title="בוט שיעורי בית",
@@ -26,14 +30,17 @@ system_prompt = """"
     
     #משימה
     התפקיד שלך - להסביר לי את החומר
-    אם אתה לא יודע - תגיד שאתה לא יודע או תחפש באינטרנט
     תסביר ברור
+    תכוון אותי לתשובה הנכונה
     
-    #מגבלות
+    #מגבלות 
+    אם אתה לא יודע - תחפש בגוגל
     **לא להמציא תשובה**
     תכתוב תשובה בצורה אנושית
     תכתוב תשובה מלאה
+    
     ** אם השתמשת בכלי (tool) תכתוב את התוצאה **
+    ** אנחנו בשנת 2026 **
 
 
 """
@@ -50,14 +57,22 @@ for line in history:
 #מקום להקליד
 user = st.chat_input("ההודעה שלך...")
 
+image_button =  st.file_uploader("העלאת תמונה", type=["png","jpg","jpeg"])
+
 if user: #אם יש הודעה
 
     showMessage("user",user)
     #שולפים את ההיסטוריה
 
+    image = None
+
+    if image_button:
+        image = PIL.Image.open(image_button)
+
+
     save_to_history("homework","user",user)
     history = st.session_state["homework"]["history"]
-    answer = sendMessage(user,system_prompt,history) #לשלוח לAI את ההודעה
+    answer = sendMessage(user,system_prompt,history,image) #לשלוח לAI את ההודעה
 
     showMessage("ai",answer) #תראה את התשובה
 

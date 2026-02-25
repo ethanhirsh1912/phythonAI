@@ -11,9 +11,13 @@ from ddgs import DDGS
 def web_search(quary : str) -> []:
     print("search: "+ quary)
 
-    with DDGS as d:
-        results = d.text(quary, max_results=3)
-        return results
+
+    with st.status("search:"+ quary):
+        with DDGS() as d:
+            results = d.text(quary,region="he_il", max_results=3)
+            print(results)
+            return results
+#web_search("ISREAL")
 
 
 def current_time() -> str:
@@ -21,6 +25,7 @@ def current_time() -> str:
     פונקצי שמחזירה מה התאריך והשעה
     :return:
     """
+    print("use tool")
     return time.ctime()
 
 
@@ -30,16 +35,19 @@ all_models = [
               "gemini-2.5-flash-lite",
               "gemini-2.0-flash",
               "gemini-2.0-flash-lite",
-               "gemini-3-flash",
+               #"gemini-3-flash",
                ]
 
 def createClient():
     st.session_state.client = genai.Client(api_key=loadAPIKey()) #יוצרים לקוח של ג'מיני
 
-def sendMessage(text,system_prompt,history=[]):
+def sendMessage(text,system_prompt,history=[],image = None):
     if 'client' not in st.session_state: #אם לא יצרת חיבור
         createClient()
 
+    content = [text]
+    if image:
+        content.append(image)
     for model in all_models: #עבור על כל המודלים
         client = st.session_state.client
         try: #מנסה
@@ -53,7 +61,7 @@ def sendMessage(text,system_prompt,history=[]):
                 )
             )
 
-            ai = chat.send_message(text)  #שליחת הודעה
+            ai = chat.send_message(content)  #שליחת הודעה
             print(ai.text)  #הדפסת תשובה
             return ai.text #תחזיר את התשובה
         except Exception as e: #לא הצליח
